@@ -20,7 +20,7 @@ char* Buffer::writePtr()
     return beginPtr() + m_writePos;
 }
 
-const char* Buffer::writePtr() const
+const char* Buffer::writePtrConst() const
 {
     return beginPtr() + m_writePos;
 }
@@ -31,7 +31,7 @@ char* Buffer::readPtr()
     return beginPtr() + m_readPos;
 }
 
-const char* Buffer::readPtr() const
+const char* Buffer::readPtrConst() const
 {
     return beginPtr() + m_readPos;
 }
@@ -121,7 +121,7 @@ void Buffer::append(const char* str, size_t len)
 // 写入一个Buffer对象
 void Buffer::append(const Buffer& buffer)
 {
-    append(buffer.readPtr(), buffer.readableBytes());
+    append(buffer.readPtrConst(), buffer.readableBytes());
 }
 
 void Buffer::ensureWritable(size_t len)
@@ -143,9 +143,11 @@ void Buffer::makeSpace(size_t len)
     else
     {
         // 将读区左移到开头
-        std::copy(readPtr(), readPtr() + readableBytes(), beginPtr());
+        size_t readable = readableBytes();
+        std::copy(beginPtr() + m_readPos, beginPtr() + m_writePos, beginPtr());
         m_readPos = 0;
-        m_writePos = m_readPos + readableBytes();
+        m_writePos = m_readPos + readable;
+        assert(readable == readableBytes());
     }
 }
 

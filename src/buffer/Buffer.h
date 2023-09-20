@@ -7,6 +7,7 @@
 #include <string>
 #include <unistd.h>
 #include <sys/uio.h> // iovec
+#include <cstring>
 
 #define BUFFER_INIT_DEFAULT_SIZE 1024
 #define BUFFER_MAX_SIZE 65535
@@ -37,11 +38,11 @@ public:
 
     // 缓冲区写指针
     char* writePtr();
-    const char* writePtr() const;
+    const char* writePtrConst() const;
 
     // 缓冲区读指针
     char* readPtr();
-    const char* readPtr() const;
+    const char* readPtrConst() const;
 
     void retrive(size_t len);
     void retrive(const char* end);
