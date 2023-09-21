@@ -18,6 +18,7 @@ Log::Log()
     m_deque = nullptr;
     m_toDay = 0;
     m_fp = nullptr;
+    m_maxLines = MAX_LINES;
 }
 
 Log::~Log()
@@ -64,7 +65,7 @@ void Log::init(int level, const char *path, const char *suffix, int maxQueueCapa
         // 创建队列
         if (!m_deque)
         {
-            std::unique_ptr<BlockQueue<std::string>> newQueue(new BlockQueue<std::string>(maxQueueCapacity));
+            std::unique_ptr<BlockQueue<std::string>> newQueue(new BlockQueue<std::string>);
             m_deque = move(newQueue);
 
             // 创建线程
@@ -129,7 +130,7 @@ void Log::write(int level, const char* format, ...)
     struct tm t = *sysTime;
 
     // 如果文件日期不一致或者文件已经写满了
-    if (m_toDay != t.tm_mday || (m_lineCount > 0 && (m_lineCount % m_maxLines == 0)))
+    if (m_toDay != t.tm_mday || (m_lineCount && (m_lineCount % m_maxLines == 0)))
     {
         std::unique_lock<mutex> locker(m_mutex);
         locker.unlock();
@@ -144,6 +145,7 @@ void Log::write(int level, const char* format, ...)
         {
             snprintf(newFilename, LOG_NAME_LEN - 72, "%s/%s%s", m_path, tail, m_suffix);
             m_toDay = t.tm_mday;
+            m_lineCount = 0;
         }
         else
         {
@@ -166,28 +168,27 @@ void Log::write(int level, const char* format, ...)
         m_buffer.hasWritten(n);
         appendLogLevelTitle(level);
 
-    }
+        // 获取变长参数列表
+        va_list vaList;
+        va_start(vaList, format);
+        int m = vsnprintf(m_buffer.writePtr(), m_buffer.writableBytes(), format, vaList);
+        va_end(vaList);
+        m_buffer.hasWritten(m);
+        m_buffer.append("\n\0", 2);
 
-    // 获取变长参数列表
-    va_list vaList;
-    va_start(vaList, format);
-    int m = vsnprintf(m_buffer.writePtr(), m_buffer.writableBytes(), format, vaList);
-    va_end(vaList);
-    m_buffer.hasWritten(m);
-    m_buffer.append("\n\0", 2);
-
-    // 如果开启了异步写线程，则暂存到阻塞队列上
-    if (m_isAsync && m_deque && !m_deque->full())
-    {
-        m_deque->push_back(m_buffer.retriveToStr());
-    }
-    // 否则直接写入文件
-    else
-    {
-        // fputs将内容写入缓冲区
-        // fputs(m_buffer.readPtr(), m_fp);
-        fwrite(m_buffer.readPtr(), sizeof(char), m_buffer.readableBytes(), m_fp);
-        m_buffer.clear();   
+        // 如果开启了异步写线程，则暂存到阻塞队列上
+        if (m_isAsync && m_deque && !m_deque->full())
+        {
+            m_deque->push_back(m_buffer.retriveToStr());
+        }
+        // 否则直接写入文件
+        else
+        {
+            // fputs将内容写入缓冲区
+            fputs(m_buffer.readPtrConst(), m_fp);
+            // fwrite(m_buffer.readPtr(), sizeof(char), m_buffer.readableBytes(), m_fp); 
+        }
+        m_buffer.clear();  
     }
     
 }

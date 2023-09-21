@@ -7,14 +7,13 @@
 #include <stdarg.h> // va_start
 
 #include "BlockQueue.h"
-#include "../buffer/Buffer.h"
+#include "Buffer.h"
 
 #define LOG_LEVEL_DEFAULT 1
 #define LOG_LEVEL_DEBUG 0
 #define LOG_LEVEL_INFO  1
 #define LOG_LEVEL_WARN  2
 #define LOG_LEVEL_ERROR 3
-#define LOG_LEVEL_INFO  4
 
 
 class Log
@@ -63,13 +62,13 @@ private:
 };
 // ## 可以将宏中的入参转为字符串
 #define LOG_BASE(level, format, ...) \
-    do \ 
+    do \
     { \
         Log *log = Log::GetInstance(); \
         if (log->isOpen() && log->getLevel() <= level) \
         { \
-            log->write(level, format, ##__VA__ARGS__); \
-            log->flush; \
+            log->write(level, format, ##__VA_ARGS__); \
+            log->flush(); \
         } \
     } \
     while (0);

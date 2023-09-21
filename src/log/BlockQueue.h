@@ -5,8 +5,9 @@
 #include <deque>
 #include <condition_variable>
 #include <sys/time.h>
+#include <assert.h>
 
-#define MAX_CAPACITY 1024
+#define MAX_CAPACITY 1000
 
 template<class T>
 class BlockQueue
@@ -187,7 +188,7 @@ bool BlockQueue<T>::pop(T& item, int timeout)
     std::unique_lock<std::mutex> locker(m_mutex);
     while (m_deq.empty())
     {
-        if (m_condConsumer.wait_for(locker, std::chrono::seconds(timeout) == std::cv_status::timeout))
+        if (m_condConsumer.wait_for(locker, std::chrono::seconds(timeout)) == std::cv_status::timeout)
         {
             return false;
         }
