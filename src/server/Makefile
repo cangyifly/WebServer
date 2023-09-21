@@ -5,7 +5,7 @@ OBJS = $(COBJS) $(CXXOBJS)
 TARGET_OBJS = $(addprefix $(OBJECT_PATH),$(OBJS))
 BASENAME = $(shell basename $(CURDIR))
 
-# libtimer.so
+# libhttp.so
 TARGET = lib$(BASENAME).so
 LIB_TARGET = $(LIB_PATH)/$(TARGET)
 
@@ -15,8 +15,8 @@ CXX = g++
 CFLAGS  = -Wall -O2 -c
 CXXFLAGS = -std=c++14 -O2 -Wall -g -c
 INCLUDES = -I$(INCLUDE_PATH)
-DEP_LIB = $(LIB_PATH)/liblog.so
-LIB = -pthread -llog
+DEP_LIB = $(LIB_PATH)/liblog.so $(LIB_PATH)/libbuffer.so $(LIB_PATH)/libpool.so $(LIB_PATH)/libhttp.so $(LIB_PATH)/libtimer.so
+LIB = -pthread -llog -lmysqlclient -lbuffer -lpool -lhttp -ltimer
 LIBS = -L $(LIB_PATH)
 
 .PHONY: all clean test
