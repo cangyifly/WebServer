@@ -7,3 +7,10 @@
 /log
 
 /object
+
+/include
+
+/src/*.o
+/src/*.d
+/src/*.d.*
+/src/*/*.o
