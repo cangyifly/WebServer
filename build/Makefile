@@ -42,6 +42,7 @@ export LIB_PATH
 export OBJECT_PATH
 export BIN_PATH
 
+export LD_LIBRARY_PATH=$(LIB_PATH)
 
 # lib文件下模块
 LIB_DIR_NAME = buffer log timer pool http server
