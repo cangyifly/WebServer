@@ -21,6 +21,7 @@ build_dir="${current_dir}/build"
 # build makefile
 build_makefile="${build_dir}/Makefile"
 
+# export LD_LIBRARY_PATH=${lib_dir}
 
 if [ ! -d "$lib_dir" ]; then
     mkdir "$lib_dir"
